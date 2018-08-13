@@ -155,15 +155,35 @@ public class WWVBSettings extends JDialog {
             radioBox.add(dstOptionsLabel);
             dstButtons = new ButtonGroup();
             JRadioButton noDstButton = new JRadioButton("No DST (Code = 00)");
-            noDstButton.addActionListener((event) -> transmitter.setDstCode(WWVBTransmitter.DSTCode.NO_DST));
+            noDstButton.addActionListener(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    transmitter.setDstCode(WWVBTransmitter.DSTCode.NO_DST);
+                }
+            });
             noDstButton.setSelected(true);
 
             JRadioButton dstEndingButton = new JRadioButton("DST Ends Today (Code = 01)");
-            dstEndingButton.addActionListener((event) -> transmitter.setDstCode(WWVBTransmitter.DSTCode.DST_ENDS));
+            dstEndingButton.addActionListener(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    transmitter.setDstCode(WWVBTransmitter.DSTCode.DST_ENDS);
+                }
+            });
             JRadioButton dstBeginsButton = new JRadioButton("DST Begins Today (Code = 10)");
-            dstBeginsButton.addActionListener((event) -> transmitter.setDstCode(WWVBTransmitter.DSTCode.DST_BEGINS));
+            dstBeginsButton.addActionListener(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    transmitter.setDstCode(WWVBTransmitter.DSTCode.DST_BEGINS);
+                }
+            });
             JRadioButton dstInEffectButton = new JRadioButton("DST Currently in Effect (Code = 11)");
-            dstInEffectButton.addActionListener((event) -> transmitter.setDstCode(WWVBTransmitter.DSTCode.DST_IN_EFFECT));
+            dstInEffectButton.addActionListener(new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    transmitter.setDstCode(WWVBTransmitter.DSTCode.DST_IN_EFFECT);
+                }
+            });
 
             dstButtons.add(noDstButton);
             dstButtons.add(dstEndingButton);
