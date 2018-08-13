@@ -67,8 +67,8 @@ import org.contikios.cooja.Simulation;
 public class ApplicationRadio extends Radio implements NoiseSourceRadio, DirectionalAntennaRadio {
   private static Logger logger = Logger.getLogger(ApplicationRadio.class);
 
-  private Simulation simulation;
-  private Mote mote;
+  protected Simulation simulation;
+  protected Mote mote;
 
   private RadioPacket packetFromMote = null;
   private RadioPacket packetToMote = null;

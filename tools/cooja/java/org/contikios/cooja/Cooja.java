@@ -118,6 +118,7 @@ import javax.swing.filechooser.FileFilter;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.contikios.cooja.dialogs.*;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
@@ -127,14 +128,6 @@ import org.jdom.output.XMLOutputter;
 import org.contikios.cooja.MoteType.MoteTypeCreationException;
 import org.contikios.cooja.VisPlugin.PluginRequiresVisualizationException;
 import org.contikios.cooja.contikimote.ContikiMoteType;
-import org.contikios.cooja.dialogs.AddMoteDialog;
-import org.contikios.cooja.dialogs.BufferSettings;
-import org.contikios.cooja.dialogs.ConfigurationWizard;
-import org.contikios.cooja.dialogs.CreateSimDialog;
-import org.contikios.cooja.dialogs.ExternalToolsDialog;
-import org.contikios.cooja.dialogs.MessageList;
-import org.contikios.cooja.dialogs.MessageListUI;
-import org.contikios.cooja.dialogs.ProjectDirectoriesDialog;
 import org.contikios.cooja.plugins.MoteTypeInformation;
 import org.contikios.cooja.plugins.ScriptRunner;
 import org.contikios.cooja.plugins.SimControl;
@@ -700,6 +693,7 @@ public class Cooja extends Observable {
     final JMenu toolsMenu = new JMenu("Tools");
     JMenu settingsMenu = new JMenu("Settings");
     JMenu helpMenu = new JMenu("Help");
+    JMenu WWVBMenu = new JMenu("WWVB");
 
     menuBar.add(fileMenu);
     menuBar.add(simulationMenu);
@@ -707,12 +701,14 @@ public class Cooja extends Observable {
     menuBar.add(toolsMenu);
     menuBar.add(settingsMenu);
     menuBar.add(helpMenu);
+    menuBar.add(WWVBMenu);
 
     fileMenu.setMnemonic(KeyEvent.VK_F);
     simulationMenu.setMnemonic(KeyEvent.VK_S);
     motesMenu.setMnemonic(KeyEvent.VK_M);
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     helpMenu.setMnemonic(KeyEvent.VK_H);
+    WWVBMenu.setMnemonic(KeyEvent.VK_W);
 
     /* File menu */
     fileMenu.addMenuListener(new MenuListener() {
@@ -1109,6 +1105,9 @@ public class Cooja extends Observable {
         + System.getProperty("sun.arch.data.model"));
     menuItem.setEnabled(false);
     helpMenu.add(menuItem);
+
+    // WWVB Menu
+    WWVBMenu.add(new JMenuItem(addWWVBRadio));
 
     return menuBar;
   }
@@ -4419,8 +4418,10 @@ public class Cooja extends Observable {
 
   /* GUI actions */
   abstract class GUIAction extends AbstractAction {
-		private static final long serialVersionUID = 6946179457635198477L;
-		public GUIAction(String name) {
+
+    private static final long serialVersionUID = 6946179457635198477L;
+
+    public GUIAction(String name) {
       super(name);
     }
     public GUIAction(String name, int nmenomic) {
@@ -4437,6 +4438,7 @@ public class Cooja extends Observable {
     }
     public abstract boolean shouldBeEnabled();
   }
+
   GUIAction newSimulationAction = new GUIAction("New simulation...", KeyEvent.VK_N, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK)) {
 		private static final long serialVersionUID = 5053703908505299911L;
 		public void actionPerformed(ActionEvent e) {
@@ -4734,6 +4736,17 @@ public class Cooja extends Observable {
       return mySimulation != null;
     }
   };
+  GUIAction addWWVBRadio = new GUIAction("Add WWVB Radio", KeyEvent.VK_A) {
+    public void actionPerformed(ActionEvent e) {
+      if (mySimulation == null) {
+        return;
+      }
+      WWVBSettings.showDialog(myDesktopPane, mySimulation);
+    }
 
+    public boolean shouldBeEnabled() {
+      return mySimulation != null;
+    }
+  };
 }
 

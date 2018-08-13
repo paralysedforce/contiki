@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Some utility methods for managing arrays.
@@ -41,6 +42,21 @@ import java.io.InputStream;
  * @author Niclas Finne, Fredrik Osterlind
  */
 public class ArrayUtils {
+
+  public static <T> T[]  concat(T[] array1, T[]... rest){
+    int totalLength = array1.length;
+    for (T[] arr: rest){
+      totalLength += arr.length;
+    }
+    T[] finalArray = Arrays.copyOf(array1, totalLength);
+    int offset = array1.length;
+
+    for (T[] arr: rest){
+      System.arraycopy(arr, 0, finalArray, offset, arr.length);
+      offset += arr.length;
+    }
+    return finalArray;
+  }
 
   @SuppressWarnings("unchecked")
   public static <T> T[] add(T[] array, T value) {
