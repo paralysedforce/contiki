@@ -294,6 +294,7 @@ public class WWVBTransmitter extends Observable implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         time = (long) arg;
+        logger.info("Update Called");
 
         // Schedule every second
         if (time % (1000 * Simulation.MILLISECOND) != 0)

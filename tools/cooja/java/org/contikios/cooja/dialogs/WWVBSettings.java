@@ -398,11 +398,13 @@ public class WWVBSettings extends JDialog {
 
             if (src.isSelected()) {
                 transmitter = new WWVBTransmitter();
+                simulation.setWWVBTransmitter(transmitter);
                 enableComponents();
                 parseDateAction.actionPerformed(null);
                 updateBox.display("Transmitter enabled.");
             } else {
                 transmitter = null;
+                simulation.setWWVBTransmitter(null);
                 disableComponents();
                 simulation.setWWVBTransmitter(null);
                 updateBox.display("Transmitter disabled.");
