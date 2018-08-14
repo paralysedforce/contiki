@@ -245,11 +245,11 @@ public class WWVBSettings extends JDialog {
             return dateTimeValues;
         }
 
-        private void addEntry(JComponent parent, String name, int i){
+        private void addEntry(JComponent parent, String name, final int i){
 
             Box childBox = Box.createHorizontalBox();
             JLabel childLabel = new JLabel(name);
-            JFormattedTextField childTextField = new JFormattedTextField();
+            final JFormattedTextField childTextField = new JFormattedTextField();
             childTextField.setValue(dateTimeValues[i]);
             childBox.add(childLabel);
             childBox.add(childTextField);
