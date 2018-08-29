@@ -76,9 +76,12 @@ public class RadioConnection {
    * @param sourceRadio Source radio
    */
   public RadioConnection(Radio sourceRadio) {
-    this.source = sourceRadio;
-    startTime = sourceRadio.getMote().getSimulation().getSimulationTime();
+    this(sourceRadio, sourceRadio.getMote().getSimulation().getSimulationTime());
+  }
 
+  public RadioConnection(Radio sourceRadio, long startTime) {
+    this.source = sourceRadio;
+    startTime = startTime;
     this.id = ID++;
   }
 

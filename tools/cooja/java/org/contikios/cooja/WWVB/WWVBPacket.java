@@ -14,6 +14,6 @@ public class WWVBPacket implements RadioPacket {
 
     @Override
     public byte[] getPacketData() {
-        return new byte[]{ code.getValue() };
+        return new byte[]{ code.getValue()};
     }
 }

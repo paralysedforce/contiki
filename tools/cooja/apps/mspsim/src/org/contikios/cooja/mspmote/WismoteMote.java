@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import org.contikios.cooja.Simulation;
 import se.sics.mspsim.platform.wismote.WismoteNode;
 
+
 /**
  * @author Fredrik Osterlind, Niclas Finne
  */

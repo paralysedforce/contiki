@@ -387,6 +387,9 @@ public class ProjectConfig {
    * @return Value or null if id wasn't found
    */
   public String[] getStringArrayValue(Class callingClass, String id) {
+    if (id.equals("MOTETYPES")){
+      logger.info(myProjectDirHistory.lastElement().getAbsolutePath());
+    }
     String stringVal = getStringValue(callingClass, id, null);
     if (stringVal == null) {
       return new String[0];

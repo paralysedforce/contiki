@@ -16,4 +16,17 @@ public enum WWVBCode {
     public byte getValue(){
         return (byte)value;
     }
+
+    public static WWVBCode parse(byte b){
+        switch(b){
+            case 0:
+                return AMP_DEC;
+            case 1:
+                return AMP_INC;
+            case 2:
+                return PHASE_CHANGE;
+            default:
+                throw new IllegalArgumentException("WWVBCode Parse Failure");
+        }
+    }
 }

@@ -40,6 +40,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.contikios.cooja.WWVB.WWVBCode;
+import org.contikios.cooja.WWVB.WWVBMedium;
 import org.contikios.cooja.WWVB.WWVBTransmitter;
 import org.contikios.cooja.interfaces.Radio;
 import org.jdom.Element;
@@ -78,29 +79,17 @@ public class Simulation extends Observable implements Runnable {
   private long currentSimulationTime = 0;
 
   private WWVBTransmitter wwvbTransmitter;
-
   private String title = null;
-
   private RadioMedium currentRadioMedium = null;
-
   private static Logger logger = Logger.getLogger(Simulation.class);
-
   private boolean isRunning = false;
-
   private boolean stopSimulation = false;
-
   private Thread simulationThread = null;
-
   private Cooja cooja = null;
-
   private long randomSeed = 123456;
-
   private boolean randomSeedGenerated = false;
-
   private long maxMoteStartupDelay = 1000*MILLISECOND;
-
   private SafeRandom randomGenerator;
-
   private boolean hasMillisecondObservers = false;
   private MillisecondObservable millisecondObservable = new MillisecondObservable();
 
@@ -436,10 +425,14 @@ public class Simulation extends Observable implements Runnable {
     if (transmitter != null){
       wwvbTransmitter = transmitter;
       addMillisecondObserver(wwvbTransmitter);
+      transmitter.setSimulation(this);
+      if (currentRadioMedium instanceof WWVBMedium)
+        ((WWVBMedium)currentRadioMedium).setTransmitter(transmitter);
     }
     else {
       deleteMillisecondObserver(wwvbTransmitter);
       wwvbTransmitter = null;
+      ((WWVBMedium)currentRadioMedium).setTransmitter(null);
     }
   }
 
@@ -1193,12 +1186,8 @@ public class Simulation extends Observable implements Runnable {
     this.title = title;
   }
 
-  public void notifyWWVBEvent(WWVBCode code, long time){
-    for (Mote mote: motes){
-      Radio radio = mote.getInterfaces().getRadio();
-      if (radio != null){
-        // Do something???
-      }
-    }
+
+  public WWVBTransmitter getWwvbTransmitter() {
+    return wwvbTransmitter;
   }
 }

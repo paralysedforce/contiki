@@ -63,6 +63,7 @@ import org.apache.log4j.Logger;
 import org.contikios.cooja.Cooja;
 import org.contikios.cooja.RadioMedium;
 import org.contikios.cooja.Simulation;
+import org.contikios.cooja.WWVB.WWVBMedium;
 
 /**
  * A dialog for creating and configuring a simulation.
@@ -85,6 +86,7 @@ public class CreateSimDialog extends JDialog {
   private JComboBox radioMediumBox;
 
   private JButton cancelButton;
+  private static boolean openWWVBDialog = false;
 
   /**
    * Shows a dialog for configuring a simulation.
@@ -339,14 +341,18 @@ public class CreateSimDialog extends JDialog {
     public void actionPerformed(ActionEvent e) {
       mySimulation.setTitle(title.getText());
 
+
       String currentRadioMediumDescription = (String) radioMediumBox.getSelectedItem();
-      for (Class<? extends RadioMedium> radioMediumClass: mySimulation.getCooja().getRegisteredRadioMediums()) {
+      for (Class<? extends RadioMedium> radioMediumClass : mySimulation.getCooja().getRegisteredRadioMediums()) {
         String radioMediumDescription = Cooja.getDescriptionOf(radioMediumClass);
 
         if (currentRadioMediumDescription.equals(radioMediumDescription)) {
           try {
             RadioMedium radioMedium = RadioMedium.generateRadioMedium(radioMediumClass, mySimulation);
             mySimulation.setRadioMedium(radioMedium);
+            if (radioMediumClass.equals(WWVBMedium.class)) {
+              openWWVBDialog = true;
+            }
           } catch (Exception ex) {
             logger.fatal("Error generating radio medium: " + ex.getMessage(), ex);
             mySimulation.setRadioMedium(null);
@@ -363,10 +369,15 @@ public class CreateSimDialog extends JDialog {
         mySimulation.setRandomSeed(((Number) randomSeed.getValue()).longValue());
       }
 
-      mySimulation.setDelayedMoteStartupTime((int) ((Number) delayedStartup.getValue()).intValue()*Simulation.MILLISECOND);
+      mySimulation.setDelayedMoteStartupTime((int) ((Number) delayedStartup.getValue()).intValue() * Simulation.MILLISECOND);
 
       dispose();
     }
   };
 
+  public static boolean getOpenWWVBDialog(){
+    boolean val = openWWVBDialog;
+    openWWVBDialog = false;
+    return val;
+  }
 }

@@ -3,6 +3,7 @@ package org.contikios.cooja.dialogs;
 import org.apache.log4j.Logger;
 import org.contikios.cooja.Cooja;
 import org.contikios.cooja.Simulation;
+import org.contikios.cooja.WWVB.WWVBMedium;
 import org.contikios.cooja.WWVB.WWVBTransmitter;
 
 import javax.swing.*;
@@ -12,6 +13,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.*;
 
 /**
@@ -38,6 +41,12 @@ public class WWVBSettings extends JDialog {
 
         setTitle("WWVB Transmitter Settings");
         setResizable(false);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                setVisible(false);
+            }
+        });
 
         radioButtonsBox = new RadioButtonsBox();
         checkBoxesBox = new CheckBoxesBox();
@@ -56,6 +65,12 @@ public class WWVBSettings extends JDialog {
         main.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         getContentPane().add(main);
         pack();
+
+        if (!(simulation.getRadioMedium() instanceof WWVBMedium)){
+            checkBoxesBox.disableTransmitterCheckbox();
+            updateBox.error("WWVB Medium Required to enable WWVB Transmitter");
+        }
+
     }
 
 
@@ -116,7 +131,6 @@ public class WWVBSettings extends JDialog {
             buttonControlBox.add(utcOffsetSpinner);
             buttonControlBox.add(offsetLabel);
 
-
             disable();
         }
 
@@ -140,6 +154,10 @@ public class WWVBSettings extends JDialog {
                 checkBox.setEnabled(false);
 
             utcOffsetSpinner.setEnabled(false);
+        }
+
+        public void disableTransmitterCheckbox(){
+            enableTransmitterCheckbox.setEnabled(false);
         }
     }
 
@@ -315,7 +333,7 @@ public class WWVBSettings extends JDialog {
             updateBox.add(Box.createGlue());
 
             displayResult = new JLabel();
-            displayResult.setPreferredSize(LABEL_SIZE);
+            displayResult.setAlignmentX(Component.RIGHT_ALIGNMENT);
             updateBox.add(displayResult);
 
             disable();
@@ -346,7 +364,7 @@ public class WWVBSettings extends JDialog {
         }
     }
 
-    public static void showDialog(JDesktopPane parent, Simulation simulation){
+    public static void showDialog(JDesktopPane parent, Simulation simulation) {
         if (Cooja.isVisualizedInApplet()) {
             return;
         }

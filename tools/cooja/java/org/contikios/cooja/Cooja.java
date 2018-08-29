@@ -684,6 +684,7 @@ public class Cooja extends Observable {
     guiActions.add(startStopSimulationAction);
     guiActions.add(removeAllMotesAction);
     guiActions.add(showBufferSettingsAction);
+    guiActions.add(addWWVBRadioAction);
 
     /* Menus */
     JMenuBar menuBar = new JMenuBar();
@@ -693,7 +694,7 @@ public class Cooja extends Observable {
     final JMenu toolsMenu = new JMenu("Tools");
     JMenu settingsMenu = new JMenu("Settings");
     JMenu helpMenu = new JMenu("Help");
-    JMenu WWVBMenu = new JMenu("WWVB");
+
 
     menuBar.add(fileMenu);
     menuBar.add(simulationMenu);
@@ -701,14 +702,13 @@ public class Cooja extends Observable {
     menuBar.add(toolsMenu);
     menuBar.add(settingsMenu);
     menuBar.add(helpMenu);
-    menuBar.add(WWVBMenu);
+
 
     fileMenu.setMnemonic(KeyEvent.VK_F);
     simulationMenu.setMnemonic(KeyEvent.VK_S);
     motesMenu.setMnemonic(KeyEvent.VK_M);
     toolsMenu.setMnemonic(KeyEvent.VK_T);
     helpMenu.setMnemonic(KeyEvent.VK_H);
-    WWVBMenu.setMnemonic(KeyEvent.VK_W);
 
     /* File menu */
     fileMenu.addMenuListener(new MenuListener() {
@@ -1083,6 +1083,16 @@ public class Cooja extends Observable {
 
     settingsMenu.add(new JMenuItem(showBufferSettingsAction));
 
+
+    menuItem = new JMenuItem("Add WWVB Radio");
+    menuItem.setMnemonic(KeyEvent.VK_W);
+    menuItem.addActionListener(addWWVBRadioAction);
+    if (isVisualizedInApplet()) {
+      menuItem.setEnabled(false);
+      menuItem.setToolTipText("Not available in applet version");
+    }
+    settingsMenu.add(menuItem);
+
     /* Help */
     helpMenu.add(new JMenuItem(showGettingStartedAction));
     helpMenu.add(new JMenuItem(showKeyboardShortcutsAction));
@@ -1105,9 +1115,6 @@ public class Cooja extends Observable {
         + System.getProperty("sun.arch.data.model"));
     menuItem.setEnabled(false);
     helpMenu.add(menuItem);
-
-    // WWVB Menu
-    WWVBMenu.add(new JMenuItem(addWWVBRadio));
 
     return menuBar;
   }
@@ -1608,7 +1615,7 @@ public class Cooja extends Observable {
 
         if (radioMediumClass != null) {
           registerRadioMedium(radioMediumClass);
-          // logger.info("Loaded radio medium class: " + radioMediumClassName);
+          logger.info("Loaded radio medium class: " + radioMediumClassName);
         } else {
           logger.warn("Could not load radio medium class: "
               + radioMediumClassName);
@@ -2676,6 +2683,9 @@ public class Cooja extends Observable {
     boolean createdOK = CreateSimDialog.showDialog(Cooja.getTopParentContainer(), newSim);
     if (createdOK) {
       cooja.setSimulation(newSim, true);
+    }
+    if (CreateSimDialog.getOpenWWVBDialog()){
+      WWVBSettings.showDialog(myDesktopPane, newSim);
     }
   }
 
@@ -4736,7 +4746,7 @@ public class Cooja extends Observable {
       return mySimulation != null;
     }
   };
-  GUIAction addWWVBRadio = new GUIAction("Add WWVB Radio", KeyEvent.VK_A) {
+  GUIAction addWWVBRadioAction = new GUIAction("Add WWVB Radio", KeyEvent.VK_A) {
     public void actionPerformed(ActionEvent e) {
       if (mySimulation == null) {
         return;

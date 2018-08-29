@@ -128,14 +128,14 @@ AROPTS = -o
 else
 
 GCC      = 1
-CC       = msp430-gcc
-LD       = msp430-gcc
-AS       = msp430-as
-AR       = msp430-ar
-NM       = msp430-nm
-OBJCOPY  = msp430-objcopy
-STRIP    = msp430-strip
-BSL      = msp430-bsl
+CC       = msp430-elf-gcc
+LD       = msp430-elf-gcc
+AS       = msp430-elf-as
+AR       = msp430-elf-ar
+NM       = msp430-elf-nm
+OBJCOPY  = msp430-elf-objcopy
+STRIP    = msp430-elf-strip
+BSL      = msp430-elf-bsl
 
 # From version 4.6.x, mspgcc does not support generic MCU identifiers such as
 # msp430x1611 in contrast to msp430f1611

@@ -4,6 +4,9 @@ import org.contikios.cooja.RadioConnection;
 import org.contikios.cooja.interfaces.Radio;
 
 /**
+ *  This is a kludge because Java has static types
+ *  im sorry aah
+ *
  * Created by vyasalwar on 8/13/18.
  */
 public class WWVBRadioConnection extends RadioConnection {
@@ -15,7 +18,6 @@ public class WWVBRadioConnection extends RadioConnection {
     private WWVBTransmitter source;
 
     public WWVBRadioConnection(WWVBTransmitter transmitter) {
-        super(null);
-        this.source = transmitter;
+        super(transmitter.getRadioSource(), transmitter.getSimulation().getSimulationTime());
     }
 }

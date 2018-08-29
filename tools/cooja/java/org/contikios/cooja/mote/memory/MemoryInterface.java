@@ -52,7 +52,6 @@ public interface MemoryInterface {
     public final int size;
 
     public enum Type {
-
       VARIABLE,
       FUNCTION
     }

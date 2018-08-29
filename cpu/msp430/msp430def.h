@@ -45,7 +45,7 @@
 #include <msp430.h>
 #include <legacymsp430.h>
 #else /* __MSPGCC__ */
-#include <io.h>
+//#include <io.h>
 #include <signal.h>
 #if !defined(MSP430_MEMCPY_WORKAROUND) && (__GNUC__ < 4)
 #define MSP430_MEMCPY_WORKAROUND 1

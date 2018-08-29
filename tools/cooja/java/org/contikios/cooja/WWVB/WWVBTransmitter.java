@@ -9,20 +9,39 @@ import java.util.*;
  * Created by vyasalwar on 8/6/18.
  */
 public class WWVBTransmitter extends Observable implements Observer {
+    Logger logger = Logger.getLogger(WWVBTransmitter.class);
+
     private long time;
 
-    public void setUtcCorrection(int utcCorrection) {
-        this.utcCorrection = utcCorrection;
-    }
-
+    // Options
     private int utcCorrection; // Represents the (signed) UTC correction in tenths of seconds
     private boolean leapSecondIndicator;
     private boolean dstAnnouncementIndicator;
     private DSTCode dstCode;
     private PhaseCode lastPhaseCode;
+    private List<AmplitudeCode> amplitudeData;
 
-    Logger logger = Logger.getLogger(WWVBTransmitter.class);
     private Simulation simulation;
+    private WWVBTransmitterRadio wwvbRadioSource;
+
+    public WWVBTransmitterRadio getRadioSource() {
+        return wwvbRadioSource;
+    }
+
+    public void setRadioSource(WWVBTransmitterRadio wwvbTransmitterRadio) {
+        this.wwvbRadioSource = wwvbTransmitterRadio;
+    }
+
+    public WWVBMedium getMedium() {
+        return wwvbMedium;
+    }
+
+    public void setMedium(WWVBMedium wwvbMedium) {
+        this.wwvbMedium = wwvbMedium;
+    }
+
+    private WWVBMedium wwvbMedium;
+
 
     public WWVBTransmitter(long time) {
         this.time = time;
@@ -31,6 +50,7 @@ public class WWVBTransmitter extends Observable implements Observer {
         dstCode = DSTCode.NO_DST;
         lastPhaseCode = PhaseCode.PH_ZERO;
         dstAnnouncementIndicator = false;
+        wwvbRadioSource = new WWVBTransmitterRadio();
     }
 
     public WWVBTransmitter() {
@@ -44,6 +64,11 @@ public class WWVBTransmitter extends Observable implements Observer {
     public Simulation getSimulation() {
         return simulation;
     }
+
+    public void setUtcCorrection(int utcCorrection) {
+        this.utcCorrection = utcCorrection;
+    }
+
 
     public void setDstAnnouncementIndicator(boolean dstAnnouncementIndicator){
         this.dstAnnouncementIndicator = dstAnnouncementIndicator;
@@ -75,7 +100,7 @@ public class WWVBTransmitter extends Observable implements Observer {
 
     // Encoding amplitude data (Legacy WWVB format)
     private enum AmplitudeCode {
-        AM_MARKER, AM_ZERO, AM_ONE;
+        AM_MARKER, AM_ZERO, AM_ONE
     }
 
     private List<AmplitudeCode> generateAmplitudeData() {
@@ -293,20 +318,20 @@ public class WWVBTransmitter extends Observable implements Observer {
      * */
     @Override
     public void update(Observable o, Object arg) {
-        time = (long) arg;
-        logger.info("Update Called");
+        // logger.info("Update Called");
 
-        // Schedule every second
-        if (time % (1000 * Simulation.MILLISECOND) != 0)
+        time = (long) arg;
+        long offset = Simulation.MILLISECOND;
+
+        // Schedule every minute, on the first millisecond
+        if (time % (60 * 1000 * Simulation.MILLISECOND) != offset)
             return;
 
         List<AmplitudeCode> amplitudeData = generateAmplitudeData();
-        long lastSecond = time;
+        long lastSecond = time - offset;
 
         for (AmplitudeCode code: amplitudeData){
-            // Schedule a downward edge at the beginning of each second
-            simulation.scheduleEvent(new WWVBTimeEvent(lastSecond, WWVBCode.AMP_DEC), lastSecond);
-
+            long lowPowerReturnTime = lastSecond + 1000 * Simulation.MILLISECOND;
             long highPowerReturnTime = lastSecond;
 
             // Find out when high power returns again
@@ -318,7 +343,11 @@ public class WWVBTransmitter extends Observable implements Observer {
                 highPowerReturnTime += 200 * Simulation.MILLISECOND;
             }
 
-            simulation.scheduleEvent(new WWVBTimeEvent(highPowerReturnTime, WWVBCode.AMP_INC), highPowerReturnTime);
+            wwvbMedium.scheduleEvent(highPowerReturnTime, WWVBCode.AMP_INC);
+            wwvbMedium.scheduleEvent(lowPowerReturnTime, WWVBCode.AMP_DEC);
+
+//            simulation.scheduleEvent(new WWVBTimeEvent(highPowerReturnTime, WWVBCode.AMP_INC), highPowerReturnTime);
+//            simulation.scheduleEvent(new WWVBTimeEvent(lowPowerReturnTime, WWVBCode.AMP_DEC), lowPowerReturnTime);
 
             lastSecond += 1000 * Simulation.MILLISECOND;
         }
