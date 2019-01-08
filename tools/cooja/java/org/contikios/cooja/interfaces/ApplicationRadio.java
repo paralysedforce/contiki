@@ -48,12 +48,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.contikios.cooja.*;
 import org.jdom.Element;
-
-import org.contikios.cooja.Mote;
-import org.contikios.cooja.MoteTimeEvent;
-import org.contikios.cooja.RadioPacket;
-import org.contikios.cooja.Simulation;
 
 /**
  * Application radio.
@@ -64,7 +60,7 @@ import org.contikios.cooja.Simulation;
  *
  * @author Fredrik Osterlind
  */
-public class ApplicationRadio extends Radio implements NoiseSourceRadio, DirectionalAntennaRadio {
+public class ApplicationRadio extends Radio implements NoiseSourceRadio, DirectionalAntennaRadio, BatteryListener {
   private static Logger logger = Logger.getLogger(ApplicationRadio.class);
 
   protected Simulation simulation;
@@ -386,7 +382,7 @@ public class ApplicationRadio extends Radio implements NoiseSourceRadio, Directi
     }
 
     this.radioOn = radioOn;
-    lastEvent = radioOn?RadioEvent.HW_ON:RadioEvent.HW_OFF;
+    lastEvent = radioOn?RadioEvent.HW_ON: RadioEvent.HW_OFF;
     lastEventTime = simulation.getSimulationTime();
     this.setChanged();
     this.notifyObservers();
@@ -428,4 +424,12 @@ public class ApplicationRadio extends Radio implements NoiseSourceRadio, Directi
   public void removeDirectionChangeListener(DirectionChangeListener l) {
   }
 
+
+  public void rebootInterface() {
+    setReceiverOn(true);
+  }
+
+  public void shutdownInterface() {
+    setReceiverOn(false);
+  }
 }

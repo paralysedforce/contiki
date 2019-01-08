@@ -30,6 +30,7 @@
 
 package org.contikios.cooja.mspmote;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import org.contikios.cooja.MoteTimeEvent;
@@ -42,14 +43,17 @@ import org.contikios.cooja.MoteTimeEvent;
 public abstract class MspMoteTimeEvent extends MoteTimeEvent {
   private static Logger logger = Logger.getLogger(MspMoteTimeEvent.class);
 
+
   private MspMote mote;
 
   public MspMoteTimeEvent(MspMote mote, long time) {
     super(mote, time);
     this.mote = mote;
+    logger.setLevel(Level.OFF);
   }
 
   public void execute(long t) {
+    logger.debug("MspMote " + mote.mspNode.getName() +  " executing");
     mote.execute(t, 0);
   }
 }

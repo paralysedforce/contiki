@@ -240,4 +240,6 @@ public class SkyFlash extends MoteInterface {
     return fileData;
   }
 
+  public void reset(){}
+
 }

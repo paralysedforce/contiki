@@ -419,4 +419,8 @@ public class CC1101Radio extends Radio implements CustomDataRadio {
     }
     return false;
   }
+
+  public void reset(){
+		radioOff();
+  }
 }

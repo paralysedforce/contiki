@@ -28,6 +28,10 @@
 
 package org.contikios.cooja;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,6 +111,8 @@ public class Simulation extends Observable implements Runnable {
   private boolean hasPollRequests = false;
   private ArrayDeque<Runnable> pollRequests = new ArrayDeque<Runnable>();
 
+  private static final boolean writeMoteShutdowns = false;
+  private static final String moteShutdownsOutputFilename = "";
 
   /**
    * Request poll from simulation thread.
@@ -187,6 +193,7 @@ public class Simulation extends Observable implements Runnable {
       /* TODO Strict scheduling from simulation thread */
       assert isSimulationThread() : "Scheduling event from non-simulation thread: " + e;
     }
+    // System.out.println(String.format("Scheduled %s at %d", e.name, time));
     eventQueue.addEvent(e, time);
   }
 
@@ -824,6 +831,26 @@ public class Simulation extends Observable implements Runnable {
   }
 
   /**
+   * Called when a mote dies from lack of power
+   */
+
+  public void powerOffMote(Mote mote){
+    Runnable powerOffMote = new Runnable() {
+      @Override
+      public void run() {
+        if (motes.contains(mote)){
+          removeMote(mote);
+          motesUninit.add(mote);
+        }
+      }
+    };
+
+    if (isRunning()){
+      powerOffMote.run();
+    }
+  }
+
+  /**
    * Called to free resources used by the simulation.
    * This method is called just before the simulation is removed.
    */
@@ -1189,5 +1216,80 @@ public class Simulation extends Observable implements Runnable {
 
   public WWVBTransmitter getWwvbTransmitter() {
     return wwvbTransmitter;
+  }
+
+  public void shutdownMote(Mote mote){
+    Runnable shutdownMoteRunnable = new Runnable() {
+      public void run() {
+        currentRadioMedium.unregisterMote(mote, Simulation.this);
+        mote.getInterfaces().shutdownMoteInterfaces();
+
+        // Log the shutdown
+        if (writeMoteShutdowns){
+          StringBuilder shutdownMessage = new StringBuilder();
+          shutdownMessage.append(currentSimulationTime).append(",")
+                  .append(mote.getInterfaces().getMoteID().getMoteID()).append(",")
+                  .append("S");
+          try {
+            FileOutputStream stream = new FileOutputStream(moteShutdownsOutputFilename);
+            stream.write(shutdownMessage.toString().getBytes());
+          } catch (IOException e) {
+            logger.warn("Mote shutdown could not be recorded");
+            e.printStackTrace();
+          }
+        }
+      }
+    };
+
+
+    if (isRunning()){
+      shutdownMoteRunnable.run();
+    }
+    else {
+      invokeSimulationThread(shutdownMoteRunnable);
+    }
+  }
+
+  public void rebootMote(Mote mote){
+
+    Runnable rebootMoteRunnable = new Runnable() {
+      public void run() {
+        if (mote.getInterfaces().getClock() != null) {
+          if (maxMoteStartupDelay > 0) {
+            mote.getInterfaces().getClock().setDrift(
+                    - getSimulationTime()
+                            - randomGenerator.nextInt((int)maxMoteStartupDelay)
+            );
+          } else {
+            mote.getInterfaces().getClock().setDrift(-getSimulationTime());
+          }
+
+          currentRadioMedium.registerMote(mote, Simulation.this);
+          mote.getInterfaces().rebootMoteInterfaces();
+
+          // Log the reboot
+          if (writeMoteShutdowns){
+            StringBuilder shutdownMessage = new StringBuilder();
+            shutdownMessage.append(currentSimulationTime).append(",")
+                    .append(mote.getInterfaces().getMoteID().getMoteID()).append(",")
+                    .append("R");
+            try {
+              FileOutputStream stream = new FileOutputStream(moteShutdownsOutputFilename);
+              stream.write(shutdownMessage.toString().getBytes());
+            } catch (IOException e) {
+              logger.warn("Mote reboot could not be recorded");
+              e.printStackTrace();
+            }
+          }
+        }
+      }
+    };
+
+    if (!isRunning()){
+      rebootMoteRunnable.run();
+    }
+    else {
+      invokeSimulationThread(rebootMoteRunnable);
+    }
   }
 }

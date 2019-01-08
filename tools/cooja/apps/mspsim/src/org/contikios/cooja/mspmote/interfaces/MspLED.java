@@ -35,6 +35,9 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.Collection;
 import javax.swing.JPanel;
+
+import org.apache.log4j.Logger;
+import org.contikios.cooja.BatteryListener;
 import org.jdom.Element;
 import org.contikios.cooja.ClassDescription;
 import org.contikios.cooja.Mote;
@@ -47,8 +50,9 @@ import se.sics.mspsim.core.StateChangeListener;
  * @author Fredrik Osterlind, Niclas Finne
  */
 @ClassDescription("Leds")
-public class MspLED extends LED {
+public class MspLED extends LED implements BatteryListener {
 
+    private Logger logger = Logger.getLogger(MspLED.class);
     private final Leds leds;
     private Color[] onColors;
     private Color[] offColors;
@@ -139,6 +143,13 @@ public class MspLED extends LED {
 
     @Override
     public void setConfigXML(Collection<Element> configXML, boolean visAvailable) {
+    }
+
+    public void rebootInterface() {
+    }
+
+    public void shutdownInterface() {
+        leds.setLeds(0);
     }
 
     private class LedsPanel extends JPanel implements StateChangeListener {

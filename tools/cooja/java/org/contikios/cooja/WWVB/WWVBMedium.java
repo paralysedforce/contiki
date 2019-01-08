@@ -18,10 +18,13 @@ import java.util.Collection;
 public class WWVBMedium extends AbstractRadioMedium {
 
     private Logger logger = Logger.getLogger(WWVBMedium.class);
+    private static boolean debug = false;
 
     private WWVBTransmitter wwvbTransmitter;
     private WWVBRadioConnection wwvbRadioConnection;
     private Simulation simulation;
+
+
 
     public WWVBMedium(Simulation simulation){
         super(simulation);
@@ -47,9 +50,17 @@ public class WWVBMedium extends AbstractRadioMedium {
     }
 
     @Override
+    public void unregisterRadioInterface(Radio radio, Simulation simulation){
+        super.unregisterRadioInterface(radio, simulation);
+        if (radio != null){
+            wwvbRadioConnection.removeDestination(radio);
+        }
+    }
+
+    @Override
     public RadioConnection createConnections(Radio radio) {
         wwvbRadioConnection.addDestination(radio);
-        logger.info("Connection Created");
+        if (debug) logger.info("Connection Created");
         return wwvbRadioConnection;
     }
 
@@ -65,15 +76,17 @@ public class WWVBMedium extends AbstractRadioMedium {
         simulation.scheduleEvent(new TimeEvent(time) {
             @Override
             public void execute(long t) {
-                StringBuilder msg = new StringBuilder();
-                msg.append(t)
-                        .append(": ")
-                        .append(code.name());
+                if (debug) {
+                    StringBuilder msg = new StringBuilder();
+                    msg.append(t)
+                            .append(": ")
+                            .append(code.name());
 
-                 logger.info(msg.toString());
+                    logger.info(msg.toString());
+                }
 
                 for (Radio radio: wwvbRadioConnection.getAllDestinations()){
-                    logger.info("Radio " + radio.toString());
+                    if (debug) logger.info("Radio " + radio.toString());
                     radio.setReceivedPacket(new WWVBPacket(code));
                 }
             }

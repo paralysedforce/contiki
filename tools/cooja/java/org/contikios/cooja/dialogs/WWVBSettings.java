@@ -40,6 +40,7 @@ public class WWVBSettings extends JDialog {
         this.transmitter = null; // new WWVBTransmitter();
 
         setTitle("WWVB Transmitter Settings");
+        setSize(400, 600);
         setResizable(false);
         this.addWindowListener(new WindowAdapter() {
             @Override

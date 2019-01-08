@@ -58,8 +58,29 @@ public class Battery extends MoteInterface {
   /**
    * @param mote Mote
    */
-  public Battery(Mote mote) {
+  private Mote mote;
+
+  public boolean isPowered() {
+    return isPowered;
   }
+
+  public void setPowered(boolean powered) {
+    if (powered != isPowered) {
+      isPowered = powered;
+
+      setChanged();
+      notifyObservers();
+    }
+  }
+
+  private boolean isPowered;
+
+  public Battery(Mote mote) {
+    this.mote = mote;
+    this.isPowered = true;
+  }
+
+
 
   public Collection<Element> getConfigXML() {
     return null;

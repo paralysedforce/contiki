@@ -14,7 +14,7 @@ import org.jdom.Element;
 import org.contikios.cooja.*;
 import org.contikios.cooja.contikimote.interfaces.ContikiLED;
 
-public class ApplicationLED extends LED {
+public class ApplicationLED extends LED implements BatteryListener {
     private static Logger logger = Logger.getLogger(ContikiLED.class);
 
     private Mote mote = null;
@@ -145,4 +145,12 @@ public class ApplicationLED extends LED {
      public void setConfigXML(Collection<Element> configXML, boolean visAvailable) {
         // TODO Auto-generated method stub
     }
-   }
+
+    public void rebootInterface() {
+
+    }
+
+    public void shutdownInterface() {
+         setLED(0);
+    }
+}

@@ -94,6 +94,7 @@ import javax.swing.event.MenuListener;
 import javax.swing.plaf.basic.BasicInternalFrameUI;
 
 import org.apache.log4j.Logger;
+import org.contikios.cooja.plugins.skins.*;
 import org.jdom.Element;
 
 import org.contikios.cooja.ClassDescription;
@@ -111,16 +112,6 @@ import org.contikios.cooja.VisPlugin;
 import org.contikios.cooja.interfaces.LED;
 import org.contikios.cooja.interfaces.Position;
 import org.contikios.cooja.interfaces.SerialPort;
-import org.contikios.cooja.plugins.skins.AddressVisualizerSkin;
-import org.contikios.cooja.plugins.skins.AttributeVisualizerSkin;
-import org.contikios.cooja.plugins.skins.GridVisualizerSkin;
-import org.contikios.cooja.plugins.skins.IDVisualizerSkin;
-import org.contikios.cooja.plugins.skins.LEDVisualizerSkin;
-import org.contikios.cooja.plugins.skins.LogVisualizerSkin;
-import org.contikios.cooja.plugins.skins.MoteTypeVisualizerSkin;
-import org.contikios.cooja.plugins.skins.PositionVisualizerSkin;
-import org.contikios.cooja.plugins.skins.TrafficVisualizerSkin;
-import org.contikios.cooja.plugins.skins.UDGMVisualizerSkin;
 
 /**
  * Simulation visualizer supporting different visualizers
@@ -206,6 +197,7 @@ public class Visualizer extends VisPlugin implements HasQuickHelp {
     registerVisualizerSkin(GridVisualizerSkin.class);
     registerVisualizerSkin(MoteTypeVisualizerSkin.class);
     registerVisualizerSkin(AttributeVisualizerSkin.class);
+    registerVisualizerSkin(IntermittentVisualizerSkin.class);
   }
   private ArrayList<VisualizerSkin> currentSkins = new ArrayList<>();
 

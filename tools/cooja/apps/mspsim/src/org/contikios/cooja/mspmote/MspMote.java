@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Hashtable;
 
 import org.apache.log4j.Logger;
+import org.contikios.cooja.interfaces.Battery;
 import org.jdom.Element;
 import org.contikios.cooja.ContikiError;
 import org.contikios.cooja.Cooja;
@@ -216,6 +217,7 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
     this.myCpu = node.getCPU();
     this.myCpu.setMonitorExec(true);
     this.myCpu.setTrace(0); /* TODO Enable */
+    this.myCpu.setRunningInCooja(true);
     
     LogListener ll = new LogListener() {
       private Logger mlogger = Logger.getLogger("MSPSim");
@@ -302,6 +304,27 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
     MspClock clock = ((MspClock) (myMoteInterfaceHandler.getClock()));
     double deviation = clock.getDeviation();
     long drift = clock.getDrift();
+
+    // If the mote is running in the simulation
+    if (booted) {
+      // Shut down the running node if it loses power
+      if (mspNode.getPendingShutdown()) {
+        nextExecute = t + duration;
+        scheduleShutdown(nextExecute);
+        return;
+      } // Reset the stopped node if it gains enough power
+      else if (mspNode.getPendingReset()) {
+        nextExecute = t + duration;
+        scheduleReboot(nextExecute);
+        return;
+      } // Keep the mote inert in Cooja as long as it remains dead, but inform MSPSim of how long it's been dead
+      else if (mspNode.isPoweredOff()) {
+        nextExecute = t + duration;
+        mspNode.decrementDelay(duration);
+        scheduleNextWakeup(nextExecute);
+        return;
+      }
+    }
 
     /* Wait until mote boots */
     if (!booted && clock.getTime() < 0) {
@@ -663,6 +686,58 @@ public abstract class MspMote extends AbstractEmulatedMote implements Mote, Watc
     for (WatchpointListener listener: listeners) {
       listener.watchpointTriggered(b);
     }
+  }
+
+  private void scheduleShutdown(long time){
+    MspMoteTimeEvent shutdownMoteEvent = new MspMoteTimeEvent(this, time) {
+      public void execute(long t) {
+        super.execute(t);
+
+        if (mspNode.getPendingShutdown()) {
+          logger.info("Executing Shutdown @ time= " + simulation.getSimulationTime() + " µs");
+          simulation.shutdownMote(MspMote.this);
+          mspNode.setPendingShutdown(false);
+          mspNode.setPoweredOff(true);
+
+          Battery battery = getInterfaces().getBattery();
+          if (battery != null)
+            battery.setPowered(false);
+
+        }
+
+        // The next wakeup should decrease the delay timer
+        MspMote.this.scheduleNextWakeup(t);
+      }
+    };
+
+
+    simulation.scheduleEvent(shutdownMoteEvent, time);
+  }
+
+  private void scheduleReboot(long time){
+    MspMoteTimeEvent rebootMoteEvent = new MspMoteTimeEvent(this, time) {
+      public void execute(long t) {
+        super.execute(t);
+
+        if (mspNode.getPendingReset()) {
+          logger.info("Executing Reboot @ time=" + simulation.getSimulationTime() + " µs");
+          simulation.rebootMote(MspMote.this);
+          lastExecute = t;
+          mspNode.setPoweredOff(false);
+          mspNode.setPendingReset(false);
+
+          Battery battery = getInterfaces().getBattery();
+          if (battery != null)
+            battery.setPowered(true);
+        }
+
+
+        MspMote.this.scheduleNextWakeup(t);
+      }
+    };
+
+    simulation.scheduleEvent(rebootMoteEvent, time);
+
   }
 
   public Collection<Element> getWatchpointConfigXML() {

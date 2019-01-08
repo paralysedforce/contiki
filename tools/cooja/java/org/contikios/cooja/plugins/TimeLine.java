@@ -78,6 +78,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
+import org.contikios.cooja.interfaces.Battery;
 import org.jdom.Element;
 
 import org.contikios.cooja.ClassDescription;
@@ -153,6 +154,7 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
   private boolean showLeds = true;
   private boolean showLogOutputs = false;
   private boolean showWatchpoints = false;
+  private boolean showMoteShutdowns = true;
 
   private Point popupLocation = null;
 
@@ -162,6 +164,7 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
   private JCheckBox showRadioOnoffCheckbox;
   private JCheckBox showRadioChannelsCheckbox;
   private JCheckBox showRadioTXRXCheckbox;
+  private JCheckBox showMoteShutdownsCheckbox;
 
   /**
    * @param simulation Simulation
@@ -278,6 +281,17 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
     });
     eventsMenu.add(showWatchpointsCheckBox);
 
+    showMoteShutdownsCheckbox = createEventCheckbox("Mote Shutdowns", "Show intermittent shutdowns for emulated motes");
+    showMoteShutdownsCheckbox.setSelected(showMoteShutdowns);
+    showWatchpointsCheckBox.setName("showMoteShutdowns");
+    showWatchpointsCheckBox.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        showMoteShutdowns = ((JCheckBox) e.getSource()).isSelected();
+        recalculateMoteHeight();
+      }
+    });
+    eventsMenu.add(showMoteShutdownsCheckbox);
+
     /* Box: events to observe */
 
     /* Panel: timeline canvas w. scroll pane and add mote button */
@@ -387,6 +401,7 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
       showRadioOnoffCheckbox.setSelected(showRadioOnoff);
       showRadioChannelsCheckbox.setSelected(showRadioChannels);
       showRadioTXRXCheckbox.setSelected(showRadioRXTX);
+      showMoteShutdownsCheckbox.setSelected(showMoteShutdowns);
   }
 
   private JCheckBox createEventCheckbox(String text, String tooltip) {
@@ -703,6 +718,9 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
           for (MoteEvent ev: moteEvents.watchpointEvents) {
             outStream.write(moteEvents.mote + "\t" + ev.time + "\t" + ev.toString() + "\n");
           }
+          for (MoteEvent ev: moteEvents.moteShutdownEvents) {
+            outStream.write(moteEvents.mote + "\t" + ev.time + "\t" + ev.toString() + "\n");
+          }
         }
 
         outStream.close();
@@ -743,10 +761,12 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
     int nrLogs = 0;
     long radioOn = 0;
     long onTimeRX = 0, onTimeTX = 0, onTimeInterfered = 0;
+    int moteShutdown = 0;
 
     public String toString() {
       return toString(true, true, true, true);
     }
+
     public String toString(boolean logs, boolean leds, boolean radioHW, boolean radioRXTX) {
       long duration = simulation.getSimulationTime(); /* XXX */
       StringBuilder sb = new StringBuilder();
@@ -1051,6 +1071,21 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
   }
 
   private void addMoteObservers(final Mote mote, final MoteEvents moteEvents) {
+    /* Shutdowns */
+    final Battery moteBattery = mote.getInterfaces().getBattery();
+    if (moteBattery != null){
+      MoteShutdownEvent startupEv = new MoteShutdownEvent(simulation.getSimulationTime(), moteBattery.isPowered());
+      moteEvents.addShutdown(startupEv);
+      Observer observer = new Observer() {
+        public void update(Observable o, Object arg) {
+          MoteShutdownEvent ev = new MoteShutdownEvent(simulation.getSimulationTime(), moteBattery.isPowered());
+          moteEvents.addShutdown(ev);
+        }
+      };
+      moteBattery.addObserver(observer);
+      activeMoteObservers.add(new MoteObservation(mote, moteBattery, observer));
+    }
+
     /* LEDs */
     final LED moteLEDs = mote.getInterfaces().getLED();
     if (moteLEDs != null) {
@@ -1258,6 +1293,9 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
     if (showWatchpoints) {
       h += EVENT_PIXEL_HEIGHT;
     }
+    if (showMoteShutdowns){
+      h += EVENT_PIXEL_HEIGHT;
+    }
     if (h != paintedMoteHeight) {
       paintedMoteHeight = h;
       timelineMoteRuler.repaint();
@@ -1323,6 +1361,10 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
       element = new Element("showWatchpoints");
       config.add(element);
     }
+    if (showMoteShutdowns){
+      element = new Element("showMoteShutdowns");
+      config.add(element);
+    }
 
     if (executionDetails) {
       element = new Element("executionDetails");
@@ -1343,6 +1385,7 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
     showLeds = false;
     showLogOutputs = false;
     showWatchpoints = false;
+    showMoteShutdowns = false;
 
     executionDetails = false;
 
@@ -1367,9 +1410,10 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
         showLeds = true;
       } else if ("showLogOutput".equals(name)) {
         showLogOutputs = true;
+      } else if ("showMoteShutdowns".equals(name)){
+        showMoteShutdowns = true;
       } else if ("showWatchpoints".equals(name)) {
         showWatchpoints = true;
-
       } else if ("executionDetails".equals(name)) {
       	executionDetails = true;
       } else if ("zoom".equals(name)) {
@@ -1671,6 +1715,13 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
         if (showLogOutputs) {
           MoteEvent firstEvent = getFirstIntervalEvent(allMoteEvents.get(mIndex).logEvents, intervalStart);
           if (firstEvent != null) {
+            firstEvent.paintInterval(g, lineHeightOffset, intervalEnd);
+          }
+          lineHeightOffset += EVENT_PIXEL_HEIGHT;
+        }
+        if (showMoteShutdowns){
+          MoteEvent firstEvent = getFirstIntervalEvent(allMoteEvents.get(mIndex).moteShutdownEvents, intervalStart);
+          if (firstEvent != null){
             firstEvent.paintInterval(g, lineHeightOffset, intervalEnd);
           }
           lineHeightOffset += EVENT_PIXEL_HEIGHT;
@@ -2100,6 +2151,22 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
       return str;
     }
   }
+  class MoteShutdownEvent extends MoteEvent {
+    private boolean poweredOn;
+
+    public MoteShutdownEvent(long time, boolean poweredOn) {
+      super(time);
+      this.poweredOn = poweredOn;
+    }
+
+    public Color getEventColor(){
+      return new Color(poweredOn? 0x40FF00 :0xFF0040);
+    }
+
+    public String toString(){
+      return "Mote was turned " + (poweredOn? "on": "off") + "<br>";
+    }
+  }
   class LEDEvent extends MoteEvent {
     boolean red;
     boolean green;
@@ -2287,6 +2354,7 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
     ArrayList<MoteEvent> ledEvents;
     ArrayList<MoteEvent> logEvents;
     ArrayList<MoteEvent> watchpointEvents;
+    ArrayList<MoteEvent> moteShutdownEvents;
 
     private MoteEvent lastRadioRXTXEvent = null;
     private MoteEvent lastRadioChannelEvent = null;
@@ -2294,6 +2362,7 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
     private MoteEvent lastLEDEvent = null;
     private MoteEvent lastLogEvent = null;
     private MoteEvent lastWatchpointEvent = null;
+    private MoteEvent lastShutdownEvent = null;
 
     public MoteEvents(Mote mote) {
       this.mote = mote;
@@ -2303,6 +2372,7 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
       this.ledEvents = new ArrayList<MoteEvent>();
       this.logEvents = new ArrayList<MoteEvent>();
       this.watchpointEvents = new ArrayList<MoteEvent>();
+      this.moteShutdownEvents = new ArrayList<MoteEvent>();
 
       if (mote.getSimulation().getSimulationTime() > 0) {
         /* Create no history events */
@@ -2386,6 +2456,16 @@ public class TimeLine extends VisPlugin implements HasQuickHelp {
 
       ledEvents.add(ev);
     }
+    public void addShutdown(MoteShutdownEvent ev) {
+      if (lastShutdownEvent != null) {
+        ev.prev = lastShutdownEvent;
+        lastShutdownEvent.next = ev;
+      }
+      lastShutdownEvent = ev;
+
+      moteShutdownEvents.add(ev);
+    }
+
     public void addLog(LogEvent ev) {
       /* Link with previous events */
       if (lastLogEvent != null) {

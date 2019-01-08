@@ -66,6 +66,7 @@ public class LEDVisualizerSkin implements VisualizerSkin {
       visualizer.repaint();
     }
   };
+
   private MoteCountListener newMotesListener = new MoteCountListener() {
     public void moteWasAdded(Mote mote) {
       LED led = mote.getInterfaces().getLED();

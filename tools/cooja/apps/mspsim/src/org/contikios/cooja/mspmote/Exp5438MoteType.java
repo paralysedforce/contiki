@@ -51,11 +51,7 @@ import org.contikios.cooja.dialogs.MessageList;
 import org.contikios.cooja.dialogs.MessageListText;
 import org.contikios.cooja.dialogs.MessageListUI;
 import org.contikios.cooja.dialogs.MessageContainer;
-import org.contikios.cooja.interfaces.IPAddress;
-import org.contikios.cooja.interfaces.Mote2MoteRelations;
-import org.contikios.cooja.interfaces.MoteAttributes;
-import org.contikios.cooja.interfaces.Position;
-import org.contikios.cooja.interfaces.RimeAddress;
+import org.contikios.cooja.interfaces.*;
 import org.contikios.cooja.mspmote.interfaces.CC1101Radio;
 import org.contikios.cooja.mspmote.interfaces.CC1120Radio;
 import org.contikios.cooja.mspmote.interfaces.Exp5438LED;
@@ -184,6 +180,7 @@ public class Exp5438MoteType extends MspMoteType {
 
   public Class<? extends MoteInterface>[] getDefaultMoteInterfaceClasses() {
 	    return new Class[] {
+                Battery.class,
 	            Position.class,
 	            RimeAddress.class,
 	            IPAddress.class,
@@ -200,6 +197,7 @@ public class Exp5438MoteType extends MspMoteType {
   }
   public Class<? extends MoteInterface>[] getAllMoteInterfaceClasses() {
     return new Class[] {
+        Battery.class,
         Position.class,
         RimeAddress.class,
         IPAddress.class,

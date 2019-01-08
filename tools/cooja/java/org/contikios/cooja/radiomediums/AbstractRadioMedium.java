@@ -430,6 +430,7 @@ public abstract class AbstractRadioMedium extends RadioMedium {
 	
 	public void registerMote(Mote mote, Simulation sim) {
 		registerRadioInterface(mote.getInterfaces().getRadio(), sim);
+
 	}
 	
 	public void unregisterMote(Mote mote, Simulation sim) {
@@ -451,9 +452,9 @@ public abstract class AbstractRadioMedium extends RadioMedium {
 	}
 	
 	public void unregisterRadioInterface(Radio radio, Simulation sim) {
+
 		if (!registeredRadios.contains(radio)) {
 			logger.warn("No radio to unregister: " + radio);
-			return;
 		}
 		
 		radio.deleteObserver(radioEventsObserver);

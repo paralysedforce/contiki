@@ -32,11 +32,7 @@ import org.contikios.cooja.AbstractionLevelDescription;
 import org.contikios.cooja.ClassDescription;
 import org.contikios.cooja.MoteInterface;
 import org.contikios.cooja.Simulation;
-import org.contikios.cooja.interfaces.IPAddress;
-import org.contikios.cooja.interfaces.Mote2MoteRelations;
-import org.contikios.cooja.interfaces.MoteAttributes;
-import org.contikios.cooja.interfaces.Position;
-import org.contikios.cooja.interfaces.RimeAddress;
+import org.contikios.cooja.interfaces.*;
 import org.contikios.cooja.mspmote.interfaces.Msp802154Radio;
 import org.contikios.cooja.mspmote.interfaces.MspButton;
 import org.contikios.cooja.mspmote.interfaces.MspClock;
@@ -75,6 +71,7 @@ public class WismoteMoteType extends AbstractMspMoteType {
     public Class<? extends MoteInterface>[] getAllMoteInterfaceClasses() {
         @SuppressWarnings("unchecked")
         Class<? extends MoteInterface>[] list = createMoteInterfaceList(
+                Battery.class,
                 Position.class,
                 RimeAddress.class,
                 IPAddress.class,

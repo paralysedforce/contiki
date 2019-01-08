@@ -372,6 +372,22 @@ public class MoteInterfaceHandler {
     polledAfterAll = null;
   }
 
+  public void rebootMoteInterfaces(){
+    for (MoteInterface moteInterface: this.moteInterfaces){
+      if (moteInterface instanceof BatteryListener){
+        ((BatteryListener)moteInterface).rebootInterface();
+      }
+    }
+  }
+
+  public void shutdownMoteInterfaces(){
+    for (MoteInterface moteInterface: this.moteInterfaces){
+      if (moteInterface instanceof BatteryListener){
+        ((BatteryListener)moteInterface).shutdownInterface();
+      }
+    }
+  }
+
   public String toString() {
     return "Mote interfaces handler (" + moteInterfaces.size() + " mote interfaces)";
   }
