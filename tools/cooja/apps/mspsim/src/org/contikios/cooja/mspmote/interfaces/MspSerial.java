@@ -64,6 +64,7 @@ public class MspSerial extends SerialUI implements SerialPort {
   public String ioConfigString() {
 	  return "USART 1";
   }
+
   public MspSerial(Mote mote) {
     this.mote = (MspMote) mote;
     this.simulation = mote.getSimulation();

@@ -266,6 +266,7 @@ public abstract class AbstractRadioMedium extends RadioMedium {
 					
 					RadioConnection newConnection = createConnections(radio);
 					activeConnections.add(newConnection);
+					logger.info("Connection created");
 					
 					for (Radio r : newConnection.getAllDestinations()) {
 						if (newConnection.getDestinationDelay(r) == 0) {
@@ -285,7 +286,7 @@ public abstract class AbstractRadioMedium extends RadioMedium {
 					updateSignalStrengths();
 					
 					/* Notify observers */
-					lastConnection = null;
+	 				lastConnection = null;
 					radioTransmissionObservable.setChangedAndNotify();
 				}
 				break;
@@ -430,6 +431,7 @@ public abstract class AbstractRadioMedium extends RadioMedium {
 	
 	public void registerMote(Mote mote, Simulation sim) {
 		registerRadioInterface(mote.getInterfaces().getRadio(), sim);
+		logger.info("Mote registered");
 
 	}
 	

@@ -30,6 +30,7 @@
  */
 package org.contikios.cooja.mspmote.interfaces;
 
+import org.apache.log4j.Logger;
 import org.contikios.cooja.Mote;
 import org.contikios.cooja.mspmote.MspMote;
 import se.sics.mspsim.core.USARTSource;
@@ -40,8 +41,11 @@ import se.sics.mspsim.core.USARTSource;
  */
 public class MspDefaultSerial extends MspSerial {
 
+    private static Logger logger = Logger.getLogger(MspDefaultSerial.class);
+
     public MspDefaultSerial(Mote mote) {
         super(mote);
+        logger.info("MspDefaultSerial init");
     }
 
     @Override
